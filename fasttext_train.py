@@ -13,7 +13,7 @@ import fasttext
 from tqdm import tqdm
 
 
-folder = "fasttext-data"
+folder = "fasttext-data-char"
 columns = [
     'location_traffic_convenience',
     'location_distance_from_business_district', 'location_easy_to_find',
@@ -24,7 +24,7 @@ columns = [
     'dish_portion', 'dish_taste', 'dish_look', 'dish_recommendation',
     'others_overall_experience', 'others_willing_to_consume_again'
 ]
-model_folder = "./models/fasttext-models"
+model_folder = "./models/fasttext-models-char"
 if not os.path.exists(model_folder):
     os.makedirs(model_folder)
 for c in columns:
@@ -33,7 +33,7 @@ for c in columns:
     model = fasttext.train_supervised(
         filename,
         epoch=20,
-        wordNgrams=2,
+        wordNgrams=3,
         minCount=5,
         lr=1.0
     )

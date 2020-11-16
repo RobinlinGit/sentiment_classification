@@ -2,6 +2,9 @@
 *.csv
 *.bin
 /fasttext-data/*
+/fasttext-data-pkuseg/*
+*.txt
+*.valid
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
