@@ -1,3 +1,7 @@
+/data/*
+*.csv
+*.bin
+/fasttext-data/*
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

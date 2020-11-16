@@ -1,0 +1,4 @@
+pandas
+hanziconv
+fasttext
+jieba
