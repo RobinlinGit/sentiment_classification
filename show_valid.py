@@ -12,7 +12,7 @@ columns = [
         'others_overall_experience', 'others_willing_to_consume_again'
 ]
 
-df = pd.read_csv("./data/char.validation.csv")
+df = pd.read_csv("./data/char.valid.pred.csv")
 df2 = pd.read_csv("./data/char.valid.csv")
 print(df2.columns)
 for c in columns:
