@@ -29,13 +29,15 @@ if not os.path.exists(model_folder):
     os.makedirs(model_folder)
 for c in columns:
     print(c)
+    c = "price_level"
     filename = os.path.join(folder, f"{c}.txt")
+    valid = os.path.join(folder, f"{c}.valid")
     model = fasttext.train_supervised(
-        filename,
-        epoch=20,
-        wordNgrams=3,
-        minCount=5,
-        lr=1.0
+        input=filename,
+        autotuneValidationFile=valid,
+        autotuneMetric="f1",
+        verbose=3,
+        lr=1
     )
     model.save_model(os.path.join(model_folder, f"{c}.bin"))
-
+    break
