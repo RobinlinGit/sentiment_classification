@@ -10,9 +10,10 @@
 '''
 import os
 import fasttext
-from tqdm import tqdm
 
 
+lr = 1
+minCount = 5
 folder = "fasttext-data-char"
 columns = [
     'location_traffic_convenience',
@@ -24,12 +25,11 @@ columns = [
     'dish_portion', 'dish_taste', 'dish_look', 'dish_recommendation',
     'others_overall_experience', 'others_willing_to_consume_again'
 ]
-model_folder = "./models/fasttext-models-char"
+model_folder = f"./models/fasttext-models-char-{lr}-{minCount}"
 if not os.path.exists(model_folder):
     os.makedirs(model_folder)
 for c in columns:
     print(c)
-    c = "price_level"
     filename = os.path.join(folder, f"{c}.txt")
     valid = os.path.join(folder, f"{c}.valid")
     model = fasttext.train_supervised(
@@ -37,7 +37,8 @@ for c in columns:
         autotuneValidationFile=valid,
         autotuneMetric="f1",
         verbose=3,
-        lr=1
+        epoch=20,
+        lr=lr,
+        minCount=minCount
     )
     model.save_model(os.path.join(model_folder, f"{c}.bin"))
-    break
