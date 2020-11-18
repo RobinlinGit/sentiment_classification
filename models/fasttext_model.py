@@ -48,7 +48,7 @@ class FasttextModel(BaseEstimator, ClassifierMixin):
     def predict(self, X, y=None):
         y = [0 for x in X]
         return y
-    
+
     def get_params(self, deep=True):
         return {
             "lr": self.lr,
@@ -58,7 +58,7 @@ class FasttextModel(BaseEstimator, ClassifierMixin):
             "epoch": self.epoch,
             "folder": self.folder
         }
-        
+
 
 
 

@@ -29,7 +29,7 @@ y = df["price_level"].values
 
 # %%
 params = {
-    "lr": [0.5]
+    "lr": [0.5, 1]
 }
 fastmodel = FasttextModel()
 model = GridSearchCV(
@@ -43,3 +43,5 @@ model.fit(X, y)
 
 
 # %%
+print(model.best_params_)
+print(model.cv_results_)
