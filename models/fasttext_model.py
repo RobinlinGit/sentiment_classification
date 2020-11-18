@@ -19,12 +19,13 @@ from utils import df2txt
 
 class FasttextModel(BaseEstimator, ClassifierMixin):
 
-    def __init__(self, lr=1, ngrams=1, ws=5, dim=100, epoch=20, folder="./temp"):
+    def __init__(self, lr=0.5, ngrams=2, ws=5, dim=100, epoch=20, min_count=5, folder="./temp"):
         self.lr = lr
         self.ngrams = ngrams
         self.ws = ws
         self.dim = dim
         self.epoch = epoch
+        self.min_count = min_count
         self.folder = folder
     
     def fit(self, X, y):
@@ -42,22 +43,24 @@ class FasttextModel(BaseEstimator, ClassifierMixin):
             wordNgrams=self.ngrams,
             ws=self.ws,
             dim=self.dim,
-            epoch=self.epoch
+            epoch=self.epoch,
+            minCount=self.min_count
         )
 
     def predict(self, X, y=None):
-        y = [0 for x in X]
+        y = [int(self.model_.predict(x)[0][0][9:]) for x in X]
         return y
 
-    def get_params(self, deep=True):
-        return {
-            "lr": self.lr,
-            "ngrams": self.ngrams,
-            "ws": self.ws,
-            "dim": self.dim,
-            "epoch": self.epoch,
-            "folder": self.folder
-        }
+    # def get_params(self, deep=True):
+    #     return {
+    #         "lr": self.lr,
+    #         "ngrams": self.ngrams,
+    #         "ws": self.ws,
+    #         "dim": self.dim,
+    #         "epoch": self.epoch,
+    #         "folder": self.folder,
+    #         "min_count": self.min_count
+    #     }
 
 
 

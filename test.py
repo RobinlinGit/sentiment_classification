@@ -1,9 +1,7 @@
 # %%
 import pandas as pd
-from models.fasttext_model import FasttextModel
 
-
-print(hasattr(FasttextModel, 'get_params'))
-print(isinstance(FasttextModel, type))
-print(not True or True)
-print(FasttextModel)
+s = ["./data/char.train.csv", "./data/char.valid.csv"]
+p = [pd.read_csv(x) for x in s]
+df = pd.concat(p)
+df.to_csv("./data/char.total.csv")
