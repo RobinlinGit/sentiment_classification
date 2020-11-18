@@ -59,13 +59,14 @@ def df2trainfile(df: pd.DataFrame, folder, mode="train"):
         os.makedirs(folder)
     for n in columns:
         labels = df[n]
-        if mode == "train":
-            filename = os.path.join(folder, f"{n}.txt")
-        else:
-            filename = os.path.join(folder, f"{n}.valid")
-        with open(filename, "w", encoding="utf-8") as f:
-            for i, text in tqdm(enumerate(contents), desc=f"{n}"):
-                f.write(f"__label__{labels[i]}\t{text}\n")
+        filename = os.path.join(folder, f"{n}.mode")
+        df2txt(contents, labels, filename)
+
+
+def df2txt(contents, labels, filename):
+    with open(filename, "w", encoding="utf-8") as f:
+        for i, text in tqdm(enumerate(contents), desc=filename):
+            f.write(f"__label__{labels[i]}\t{text}\n")
 
 
 def get_f1_score(y_true, y_pred):
