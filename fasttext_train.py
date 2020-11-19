@@ -12,10 +12,12 @@ import os
 import fasttext
 
 
-lr = 2
-minCount = 5
-wordNgrams = 2
-dim = 150
+lr = 1
+minCount = 1
+wordNgrams = 4
+dim = 50
+ws = 6
+
 
 folder = "fasttext-data-char"
 columns = [
@@ -29,20 +31,22 @@ columns = [
     'dish_portion', 'dish_taste', 'dish_look', 'dish_recommendation',
     'others_overall_experience', 'others_willing_to_consume_again'
 ]
-model_folder = f"./models/fasttext-models-char-{lr}-{minCount}-{wordNgrams}-{dim}"
+model_folder = f"./model-zoo/fasttext-models-char-{lr}-{minCount}-{wordNgrams}-{dim}"
 if not os.path.exists(model_folder):
     os.makedirs(model_folder)
-for c in columns[10:]:
+for c in columns:
     print(c)
+    c = "dish_taste"
     filename = os.path.join(folder, f"{c}.txt")
     valid = os.path.join(folder, f"{c}.valid")
     model = fasttext.train_supervised(
         input=filename,
         verbose=3,
-        epoch=25,
+        epoch=20,
         lr=lr,
         minCount=minCount,
         wordNgrams=wordNgrams,
         dim=dim
     )
     model.save_model(os.path.join(model_folder, f"{c}.bin"))
+    break
