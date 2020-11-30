@@ -56,7 +56,7 @@ def result2submission(filename):
     for idx in range(len(df)):
         for i, c in enumerate(columns):
             s = df[c][idx]
-            result["id"].append(f"{idx}-i")
+            result["id"].append(f"{idx}-{i}")
             result["label"].append(s)
     df2 = pd.DataFrame(result)
     df2.to_csv("submission.csv", index=False)

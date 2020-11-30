@@ -1,6 +1,7 @@
 # %%
 import fasttext
 import pandas as pd
+from utils import result2submission
 
 
 # %%
@@ -14,14 +15,15 @@ columns = [
     'dish_portion', 'dish_taste', 'dish_look', 'dish_recommendation',
     'others_overall_experience', 'others_willing_to_consume_again'
 ]
-df = pd.read_csv("./data/processed.test.csv")
+# df = pd.read_csv("./data/processed.test.csv")
 
-for c in columns:
-    print(c)
-    model = fasttext.load_model(f"./models/fasttext-models/{c}.bin")
-    def predict(x):
-        x = model.predict(x)[0][0]
-        x = int(x[9:])
-        return x
-    df[c] = df["content"].apply(predict)
-df.to_csv("./data/result.csv")
+# for c in columns:
+#     print(c)
+#     model = fasttext.load_model(f"./models/fasttext-models/{c}.bin")
+#     def predict(x):
+#         x = model.predict(x)[0][0]
+#         x = int(x[9:])
+#         return x
+#     df[c] = df["content"].apply(predict)
+# df.to_csv("./data/result.csv")
+result2submission("./data/result.csv")
