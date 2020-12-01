@@ -1,7 +1,13 @@
 /data/*
+*.record
 *.csv
 *.bin
+*.pt
 /fasttext-data/*
+/fasttext-data-pkuseg/*
+*.txt
+*.valid
+.vscode/*
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
