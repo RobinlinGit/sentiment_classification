@@ -44,7 +44,6 @@ def train(model, iterator, optimizer, criterion, clip, device):
     for i, batch in tqdm(enumerate(iterator), desc="trainning"):
         
         seqs, y, seq_lens = batch
-        print(seqs.size())
         seqs = seqs.to(device)
 
         y = y.to(device)
@@ -60,16 +59,9 @@ def train(model, iterator, optimizer, criterion, clip, device):
         loss = criterion(output, y)
         output = output.to(torch.device("cpu"))
         y = y.to(torch.device("cpu"))
-        print(loss)
-        try:
-            loss.backward()
-        except RuntimeError as e:
-            print(e)
-            # print(loss)
-            
-            torch.save(output, "output.pt")
-            torch.save(y, "y.pt")
-            return
+
+        loss.backward()
+
         torch.nn.utils.clip_grad_norm_(model.parameters(), clip)
         
         optimizer.step()

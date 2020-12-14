@@ -3,6 +3,7 @@ import argparse
 import fasttext
 import os
 import pandas as pd
+import numpy as np
 from utils import result2submission, get_f1_score
 
 
@@ -23,23 +24,28 @@ def main():
         'service_wait_time', 'service_waiters_attitude',
         'service_parking_convenience', 'service_serving_speed', 'price_level',
         'price_cost_effective', 'price_discount', 'environment_decoration',
-        'environment_noise', 'environment_space', 'environment_clean',
+        'environment_noise', 'environment_space', 
+        'environment_clean',
         'dish_portion', 'dish_taste', 'dish_look', 'dish_recommendation',
-        'others_overall_experience', 'others_willing_to_consume_again'
+        'others_overall_experience', 
+        'others_willing_to_consume_again'
     ]
-    df = pd.read_csv(args.filename)
+    df = pd.read_csv(args.filename, lineterminator="\n")
     folder = args.model_folder
     for c in columns:
         print(c)
         model = fasttext.load_model(os.path.join(folder, f"{c}.bin"))
         def predict(x):
             x = model.predict(x)[0][0]
-            x = int(x[9:])
-            return x
+            x = float(x[9:])
+            if np.isnan(x):
+                x = -2
+            return int(x)
+            
         df[c] = df["content"].apply(predict)
     df.to_csv(args.dst)
     if args.mode == "test":
-        result2submission(args.dst)
+        result2submission(df, args.dst)
 
 
 if __name__ == "__main__":

@@ -20,7 +20,8 @@ from utils import Voc, TextDataset, pad_collate
 from models.bilstm_att_pool import BilstmAspectAttPool
 
 
-class Configs0(object):
+
+class Configs(object):
 
     def __init__(self):
         self.hid_dim = 256
@@ -59,16 +60,21 @@ model = BilstmAspectAttPool(configs)
 model.load_state_dict(torch.load("./model-zoo/bilstm_aspect_att_pool2.pt"))
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = model.to(device)
-testset = TextDataset(filename, "./data/voc.json")
-test_loader = DataLoader(testset, batch_size=4, shuffle=False, collate_fn=pad_collate)
-
+voc = Voc()
+voc.loads("./data/voc.json")
+df = pd.read_csv("./data/char.test.csv")
+columns = df.columns[-20:]
+pred_df = df[columns].copy()
 # %%
 output_list = []
 y_list = []
 
 # %%
-for batch in tqdm(test_loader):
-    seq, y, seq_len = batch
+for i, content in tqdm(enumerate(df["content"])):
+    seq = voc.sentence2idx(content.split(" "))
+    seq_len = torch.LongTensor([len(seq)])
+    seq = torch.LongTensor(seq)
+    seq = seq.unsqueeze(-1)
     seq = seq.to(device)
     
     output = model(seq, seq_len)
@@ -77,15 +83,21 @@ for batch in tqdm(test_loader):
     output = output.argmax(-1)
     
     output_list.append(output)
-    y_list.append(y)
 # %%
-output = torch.cat(output_list).numpy()
-y = torch.cat(y_list).numpy()
-df = pd.read_csv(filename)
-columns = df.columns[-20:]
-f1_list = []
-for i in range(20):
-    score = f1_score(y_true=y[:, i], y_pred=output[:, i], average="macro")
-    f1_list.append(score)
-    print(f"{columns[i]}: {score}")
-print(f"total: {np.mean(f1_list)}")
+output = torch.cat(output_list).numpy() - 2
+
+columns = [
+        'location_traffic_convenience',
+        'location_distance_from_business_district', 'location_easy_to_find',
+        'service_wait_time', 'service_waiters_attitude',
+        'service_parking_convenience', 'service_serving_speed', 'price_level',
+        'price_cost_effective', 'price_discount', 'environment_decoration',
+        'environment_noise', 'environment_space', 'environment_clean',
+        'dish_portion', 'dish_taste', 'dish_look', 'dish_recommendation',
+        'others_overall_experience', 'others_willing_to_consume_again'
+]
+# %%
+pred_df = pd.DataFrame(output, columns=columns)
+pred_df.to_csv("./data/bilstm-pred.csv")
+
+# %%

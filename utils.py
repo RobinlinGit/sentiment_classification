@@ -53,7 +53,7 @@ def seg_char(sent):
 
 def text_preprocess(contents, cut=jieba.cut):
     def replace(x):
-        x = x.replace('"', "").replace("\r\n", " ").replace("\n", " ")
+        x = x.replace('"', "").replace("\r\n", " ").replace("\n", " ").replace(",", "，")
         x = HanziConv.toSimplified(x)
         x = [a for a in cut(x) if a not in stop_words]
         x = " ".join(x)
@@ -70,22 +70,22 @@ def df2trainfile(df: pd.DataFrame, folder, mode="train"):
         os.makedirs(folder)
     for n in columns:
         labels = df[n]
-        filename = os.path.join(folder, f"{n}.mode")
+        filename = os.path.join(folder, f"{n}.{mode}")
         df2txt(contents, labels, filename)
 
 
 def df2txt(contents, labels, filename):
     with open(filename, "w", encoding="utf-8") as f:
         for i, text in tqdm(enumerate(contents), desc=filename):
-            f.write(f"__label__{labels[i]}\t{text}\n")
+            f.write(f"__label__{labels.iloc[i]}\t{text}\n")
 
 
 def get_f1_score(y_true, y_pred):
     return f1_score(y_true, y_pred, labels=[1, 0, -1, -2], average='macro')
 
 
-def result2submission(filename):
-    df = pd.read_csv(filename)
+def result2submission(df, dst):
+    # df = pd.read_csv(filename)
     columns = df.columns[-20:]
     result = {"id": [], "label": []}
     for idx in range(len(df)):
@@ -94,7 +94,7 @@ def result2submission(filename):
             result["id"].append(f"{idx}-{i}")
             result["label"].append(s)
     df2 = pd.DataFrame(result)
-    df2.to_csv("submission.csv", index=False)
+    df2.to_csv(dst, index=False)
 
 
 class Voc(object):

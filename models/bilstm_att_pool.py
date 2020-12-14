@@ -1,4 +1,5 @@
 import json
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -16,12 +17,14 @@ class Configs(object):
         self.fc2_dim = 4    # class num
         self.dropout = 0.5
         self.num_layers = 1
+        self.pool_kernal = 4
+        self.dim_after_pool = int(np.ceil((self.hid_dim * 2 - self.pool_kernal) / self.pool_kernal) + 1)
+        self.aspect_dim = 128
+        
 
-
-class BilstmAspectAtt(nn.Module):
-
+class BilstmAspectAttPool(nn.Module):
     def __init__(self, configs=Configs()):
-        super(BilstmAspectAtt, self).__init__()
+        super(BilstmAspectAttPool, self).__init__()
         self.emb = nn.Embedding(configs.voc_num, configs.emb_dim, padding_idx=0)
         self.lstm = nn.LSTM(
             input_size=configs.emb_dim,
@@ -30,8 +33,10 @@ class BilstmAspectAtt(nn.Module):
             dropout=configs.dropout,
             bidirectional=True)
         self.tanh = nn.Tanh()
-        self.aspects = nn.Parameter(torch.randn(configs.hid_dim * 2, configs.aspect_num))
-        self.fc1 = nn.Linear(2 * configs.hid_dim, configs.fc1_dim)
+        self.max_pool = nn.MaxPool1d(4)
+        self.fc0 = nn.Linear(configs.dim_after_pool, configs.aspect_dim)
+        self.aspects = nn.Parameter(torch.randn(configs.aspect_dim, configs.aspect_num))
+        self.fc1 = nn.Linear(configs.dim_after_pool + configs.aspect_dim, configs.fc1_dim)
         self.fc2 = nn.Linear(configs.fc1_dim, configs.fc2_dim)
     
     def forward(self, x, x_lens):
@@ -48,9 +53,12 @@ class BilstmAspectAtt(nn.Module):
         output, output_len = pad_packed_sequence(output)
         # print(f"lstm output: {output.size()}")
         # print(f"output_len: {output_len}")
+        output = self.max_pool(output)
         output = self.tanh(output)
-        # x [src len, batch size, hid dim]
-        alpha = torch.matmul(output, self.aspects)
+        # x [src len, batch size, hid dim2]
+        output2 = self.fc0(output)
+        # output [src len, batch size, aspect dim]
+        alpha = torch.matmul(output2, self.aspects)
         alpha = F.softmax(alpha, dim=0)
         # alpha [src len, batch size, hid dim]
         alpha = alpha.unsqueeze(-2)
@@ -60,7 +68,13 @@ class BilstmAspectAtt(nn.Module):
         output = output * alpha
         # output [src len, batch size, hid dim, aspect num]
         output = torch.sum(output, dim=0).permute(0, 2, 1)
-        # output [batch size, aspect num, hid dim]
+        # output [batch size, aspect num, hid dim 2]
+        batch_size = output.size()[0]
+        aspects = self.aspects.unsqueeze(0).repeat(batch_size, 1, 1)
+        # aspects [batch size, aspect dim, aspect num]
+        aspects = aspects.permute(0, 2, 1)
+        # aspects [batch size, aspect num, aspect dim]
+        output = torch.cat([aspects, output], dim=2)
         output = F.relu(output, inplace=True)
         # classify
         output = self.fc1(output)
@@ -68,4 +82,4 @@ class BilstmAspectAtt(nn.Module):
         # output [batch size, aspect num, fc1 dim]
         output = self.fc2(output)
         return output
-        
+
